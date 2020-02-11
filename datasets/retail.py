@@ -6,9 +6,12 @@ import numpy as np
 
 import torch
 import torch.utils.data as data
+from PIL import Image, ImageFilter
 
-#from utils.image import get_border, get_affine_transform, affine_transform, color_aug
-#from utils.image import draw_umich_gaussian, gaussian_radius
+import xml.etree.ElementTree as elemTree
+
+from utils.image import get_border, get_affine_transform, affine_transform, color_aug
+from utils.image import draw_umich_gaussian, gaussian_radius
 
 NAMES = ['__background__', 'object']
 
@@ -25,12 +28,13 @@ class Retail(data.Dataset):
     super(Retail, self).__init__()
     self.num_classes = 1
     self.class_name = NAMES
-    h,w = 512,384
+    h,w = 512,384 #image size
 
     self.eig_val = np.array(EIGEN_VALUES, dtype=np.float32)
     self.eig_vec = np.array(EIGEN_VECTORS, dtype=np.float32)
     self.mean = np.array(MEAN, dtype=np.float32)[None, None, :]
     self.std = np.array(STD, dtype=np.float32)[None, None, :]
+    self.data_rng = np.random.RandomState(123)
 
     self.split = split # 1.0
     self.data_dir = os.path.join(data_dir, "retail")
@@ -50,18 +54,28 @@ class Retail(data.Dataset):
     print('Loaded %d %s samples' % (self.num_samples, split))
 
   def __getitem__(self, index):
-    img_id = self.images[index]
-    img_path = os.path.join(self.img_dir, self.coco.loadImgs(ids=[img_id])[0]['file_name'])
-    ann_ids = self.coco.getAnnIds(imgIds=[img_id])
-    annotations = self.coco.loadAnns(ids=ann_ids)
-    labels = np.array([self.cat_ids[anno['category_id']] for anno in annotations])
-    bboxes = np.array([anno['bbox'] for anno in annotations], dtype=np.float32)
+    img_id = self.ids[index]
+    img_path   = self.data_dir +"/images/"     +img_id+".jpeg"
+    annot_path = self.data_dir +"/annotations/"+img_id+".xml"
+
+    tree = elemTree.parse(annot_path)
+    annotations = [[float(obj.find('robndbox').find('cx').text),      #ctrX
+                    float(obj.find('robndbox').find('cy').text),      #ctrY
+                    float(obj.find('robndbox').find('w').text),       #W
+                    float(obj.find('robndbox').find('h').text),       #H
+                    float(obj.find('robndbox').find('angle').text)]   #angle
+                    for obj in tree.findall('./object')]
+
+    labels = np.array([1. for anno in annotations])
+    bboxes = np.array([anno for anno in annotations], dtype=np.float32)
+
     if len(bboxes) == 0:
       bboxes = np.array([[0., 0., 0., 0.]], dtype=np.float32)
       labels = np.array([[0]])
-    bboxes[:, 2:] += bboxes[:, :2]  # xywh to xyxy
 
     img = cv2.imread(img_path)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
     height, width = img.shape[0], img.shape[1]
     center = np.array([width / 2., height / 2.], dtype=np.float32)  # center of image
     scale = max(height, width) * 1.0
@@ -69,67 +83,42 @@ class Retail(data.Dataset):
     flipped = False
     if self.split == 'train':
       scale = scale * np.random.choice(self.rand_scales)
-      w_border = get_border(128, width)
-      h_border = get_border(128, height)
+      w_border = get_border(self.img_size['w'], width)
+      h_border = get_border(self.img_size['h'], height)
       center[0] = np.random.randint(low=w_border, high=width - w_border)
       center[1] = np.random.randint(low=h_border, high=height - h_border)
 
-      if np.random.random() < 0.5:
-        flipped = True
-        img = img[:, ::-1, :]
-        center[0] = width - center[0] - 1
-
-    trans_img = get_affine_transform(center, scale, 0, [self.img_size['w'], self.img_size['h']])
-    img = cv2.warpAffine(img, trans_img, (self.img_size['w'], self.img_size['h']))
-
-    # -----------------------------------debug---------------------------------
-    # for bbox, label in zip(bboxes, labels):
-    #   if flipped:
-    #     bbox[[0, 2]] = width - bbox[[2, 0]] - 1
-    #   bbox[:2] = affine_transform(bbox[:2], trans_img)
-    #   bbox[2:] = affine_transform(bbox[2:], trans_img)
-    #   bbox[[0, 2]] = np.clip(bbox[[0, 2]], 0, self.img_size['w'] - 1)
-    #   bbox[[1, 3]] = np.clip(bbox[[1, 3]], 0, self.img_size['h'] - 1)
-    #   cv2.rectangle(img, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255, 0, 0), 2)
-    #   cv2.putText(img, self.class_name[label + 1], (int(bbox[0]), int(bbox[1])),
-    #               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-    # cv2.imshow('img', img)
-    # cv2.waitKey()
-    # -----------------------------------debug---------------------------------
-
     img = img.astype(np.float32) / 255.
 
-    if self.split == 'train':
-      color_aug(self.data_rng, img, self.eig_val, self.eig_vec)
+    #if self.split == 'train':
+      #color_aug(self.data_rng, img, self.eig_val, self.eig_vec)
 
-    img -= self.mean
-    img /= self.std
+    #img -= self.mean
+    #img /= self.std
     img = img.transpose(2, 0, 1)  # from [H, W, C] to [C, H, W]
 
-    trans_fmap = get_affine_transform(center, scale, 0, [self.fmap_size['w'], self.fmap_size['h']])
-
-    hmap = np.zeros((self.num_classes, self.fmap_size['h'], self.fmap_size['w']), dtype=np.float32)  # heatmap
+    hmap = np.zeros((self.num_classes, self.fmap_size['w'], self.fmap_size['h']), dtype=np.float32)  # heatmap
     w_h_ = np.zeros((self.max_objs, 2), dtype=np.float32)  # width and height
+    thetas = np.zeros((self.max_objs, 1), dtype=np.float32)
     regs = np.zeros((self.max_objs, 2), dtype=np.float32)  # regression
-    inds = np.zeros((self.max_objs,), dtype=np.int64s)
+    inds = np.zeros((self.max_objs,), dtype=np.int64)
     ind_masks = np.zeros((self.max_objs,), dtype=np.uint8)
+    objCnt = np.zeros((self.max_objs,2),dtype=np.float32)
 
     # detections = []
-    for k, (bbox, label) in enumerate(zip(bboxes, labels)):
-      if flipped:
-        bbox[[0, 2]] = width - bbox[[2, 0]] - 1
-      bbox[:2] = affine_transform(bbox[:2], trans_fmap)
-      bbox[2:] = affine_transform(bbox[2:], trans_fmap)
-      bbox[[0, 2]] = np.clip(bbox[[0, 2]], 0, self.fmap_size['w'] - 1)
-      bbox[[1, 3]] = np.clip(bbox[[1, 3]], 0, self.fmap_size['h'] - 1)
-      h, w = bbox[3] - bbox[1], bbox[2] - bbox[0]
+    for k, (rbox, label) in enumerate(zip(bboxes, labels)):
+      h, w, angle = rbox[3], rbox[2], rbox[-1]
+      if(angle >= np.pi/2):
+          angle = angle - np.pi/2
       if h > 0 and w > 0:
-        obj_c = np.array([(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2], dtype=np.float32)
+        obj_c = np.array([rbox[0], rbox[1]], dtype=np.float32)/float(self.down_ratio)
+        objCnt[k] = obj_c
         obj_c_int = obj_c.astype(np.int32)
 
         radius = max(0, int(gaussian_radius((math.ceil(h), math.ceil(w)), self.gaussian_iou)))
-        draw_umich_gaussian(hmap[label], obj_c_int, radius)
-        w_h_[k] = 1. * w, 1. * h
+        draw_umich_gaussian(hmap[int(label)-1], obj_c_int, radius)
+        w_h_[k] = w/512. , h/384.
+        thetas[k] = angle
         regs[k] = obj_c - obj_c_int  # discretization error
         inds[k] = obj_c_int[1] * self.fmap_size['w'] + obj_c_int[0]
         ind_masks[k] = 1
@@ -142,14 +131,62 @@ class Retail(data.Dataset):
 
     return {'image': img,
             'hmap': hmap, 'w_h_': w_h_, 'regs': regs, 'inds': inds, 'ind_masks': ind_masks,
-            'c': center, 's': scale, 'img_id': img_id}
+            'c': center, 's': scale, 'img_id': img_id, 'theta' : thetas, 'center':objCnt}
 
   def __len__(self):
     return self.num_samples
 
 
 if __name__ == '__main__':
-  from tqdm import tqdm
   import pickle
+  import sys,random
+  import matplotlib.pyplot as plt
+  from skimage.transform import resize
+  # insert at 1, 0 is the script path (or '' in REPL)
+  sys.path.insert(1, '/Users/seungyoun/Desktop/machine_learning/pytorch_simple_CenterNet_45-master')
+  from utils.image import get_border, get_affine_transform, affine_transform, color_aug
+  from utils.image import draw_umich_gaussian, gaussian_radius
 
   dataset = Retail('/Users/seungyoun/Desktop/machine_learning/pytorch_simple_CenterNet_45-master/data/', 'train')
+
+  """
+  train_loader = torch.utils.data.DataLoader(dataset, batch_size=2,
+                                             shuffle=False, num_workers=0,
+                                             pin_memory=True, drop_last=True)
+
+  for b in train_loader:
+      print(b)
+  """
+  fig = plt.figure(figsize=(12, 6))
+
+  select = random.randint(1,150)
+  batch = dataset[select]
+
+  img   = torch.tensor(batch['image'])
+  img = img.permute(1,2,0).numpy()
+  plt.imshow(img)
+
+  hmap  = batch['hmap']
+  hmap = hmap.transpose(1,2,0).squeeze()
+  hmap = resize(hmap, (96*4, 128*4))
+
+  plt.imshow(hmap, alpha = 0.5)
+
+  inds = batch['inds']
+  w_h_ = batch['w_h_']
+  regs = batch['regs']
+  theta= batch['theta']
+  ind_masks = batch['ind_masks']
+  cntOrg = batch['center']*4.
+  objs = sum(ind_masks)
+  cntOrg = np.array([cntOrg[i] for i in range(objs)])
+
+  for i in range(objs):
+      angle = theta[i]
+      print(theta[i] , " -> ", theta[i]*180./np.pi)
+      print("fin : ",angle*180./np.pi)
+      w = w_h_[i][0]//2*512.
+      dx , dy = w*np.sin(angle)[0] , -1*w*np.cos(angle)[0]
+      plt.arrow(cntOrg[i][0], cntOrg[i][1], dx, dy, head_width=5, head_length=5, fc='k', ec='k')
+
+  plt.show()
