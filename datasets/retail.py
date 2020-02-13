@@ -10,8 +10,8 @@ from PIL import Image, ImageFilter
 
 import xml.etree.ElementTree as elemTree
 
-from utils.image import get_border, get_affine_transform, affine_transform, color_aug
-from utils.image import draw_umich_gaussian, gaussian_radius
+#from utils.image import get_border, get_affine_transform, affine_transform, color_aug
+#from utils.image import draw_umich_gaussian, gaussian_radius
 
 NAMES = ['__background__', 'object']
 
@@ -28,7 +28,7 @@ class Retail(data.Dataset):
     super(Retail, self).__init__()
     self.num_classes = 1
     self.class_name = NAMES
-    h,w = 512,384 #image size
+    w,h = 512,384 #image size
 
     self.eig_val = np.array(EIGEN_VALUES, dtype=np.float32)
     self.eig_vec = np.array(EIGEN_VECTORS, dtype=np.float32)
@@ -97,7 +97,7 @@ class Retail(data.Dataset):
     #img /= self.std
     img = img.transpose(2, 0, 1)  # from [H, W, C] to [C, H, W]
 
-    hmap = np.zeros((self.num_classes, self.fmap_size['w'], self.fmap_size['h']), dtype=np.float32)  # heatmap
+    hmap = np.zeros((self.num_classes, self.fmap_size['h'], self.fmap_size['w']), dtype=np.float32)  # heatmap
     w_h_ = np.zeros((self.max_objs, 2), dtype=np.float32)  # width and height
     thetas = np.zeros((self.max_objs, 1), dtype=np.float32)
     regs = np.zeros((self.max_objs, 2), dtype=np.float32)  # regression
@@ -107,9 +107,7 @@ class Retail(data.Dataset):
 
     # detections = []
     for k, (rbox, label) in enumerate(zip(bboxes, labels)):
-      h, w, angle = rbox[3], rbox[2], rbox[-1]
-      if(angle >= np.pi/2):
-          angle = angle - np.pi/2
+      w, h, angle = rbox[2], rbox[3], rbox[-1]
       if h > 0 and w > 0:
         obj_c = np.array([rbox[0], rbox[1]], dtype=np.float32)/float(self.down_ratio)
         objCnt[k] = obj_c
@@ -117,7 +115,7 @@ class Retail(data.Dataset):
 
         radius = max(0, int(gaussian_radius((math.ceil(h), math.ceil(w)), self.gaussian_iou)))
         draw_umich_gaussian(hmap[int(label)-1], obj_c_int, radius)
-        w_h_[k] = w/512. , h/384.
+        w_h_[k] = w/self.img_size['w'] , h/self.img_size['h']
         thetas[k] = angle
         regs[k] = obj_c - obj_c_int  # discretization error
         inds[k] = obj_c_int[1] * self.fmap_size['w'] + obj_c_int[0]
@@ -137,11 +135,14 @@ class Retail(data.Dataset):
     return self.num_samples
 
 
+
 if __name__ == '__main__':
   import pickle
   import sys,random
+  import matplotlib
   import matplotlib.pyplot as plt
   from skimage.transform import resize
+  import matplotlib.patches as patches
   # insert at 1, 0 is the script path (or '' in REPL)
   sys.path.insert(1, '/Users/seungyoun/Desktop/machine_learning/pytorch_simple_CenterNet_45-master')
   from utils.image import get_border, get_affine_transform, affine_transform, color_aug
@@ -156,6 +157,21 @@ if __name__ == '__main__':
 
   for b in train_loader:
       print(b)
+  """
+
+  plt.figure(figsize=(6,6))
+  ws, hs = list(),list()
+  for i in range(len(dataset)):
+      batch = dataset[i]
+      w_h_ = batch['w_h_']
+      objNum = sum(batch['ind_masks'])
+      for n in range(objNum):
+          ws.append(w_h_[n][0]*512)
+          hs.append(w_h_[n][1]*384)
+  plt.scatter(ws,hs, s=1)
+  print(len(ws),len(hs))
+  plt.show()
+
   """
   fig = plt.figure(figsize=(12, 6))
 
@@ -183,10 +199,22 @@ if __name__ == '__main__':
 
   for i in range(objs):
       angle = theta[i]
-      print(theta[i] , " -> ", theta[i]*180./np.pi)
-      print("fin : ",angle*180./np.pi)
-      w = w_h_[i][0]//2*512.
-      dx , dy = w*np.sin(angle)[0] , -1*w*np.cos(angle)[0]
-      plt.arrow(cntOrg[i][0], cntOrg[i][1], dx, dy, head_width=5, head_length=5, fc='k', ec='k')
+      print("="*30)
+      print("angle : ",angle*180./np.pi)
+      w = w_h_[i][0]*512.
+      h = w_h_[i][1]*384.
+      print(cntOrg[i],w,h)
+
+      rect = patches.Rectangle((cntOrg[i][0]-w/2,cntOrg[i][1]-h/2),w,h,linewidth=1,edgecolor='r',facecolor='none')
+      rectRot = patches.Rectangle((cntOrg[i][0]-w/2,cntOrg[i][1]-h/2),w,h,linewidth=1,edgecolor='b',facecolor='none')
+     # plt.gca().add_patch(rect)
+      t = matplotlib.transforms.Affine2D().rotate_around(float(cntOrg[i][0]), float(cntOrg[i][1]), float(angle))
+      rectRot.set_transform(t + plt.gca().transData)
+      plt.gca().add_patch(rectRot)
+      plt.text(cntOrg[i][0]-w/3, cntOrg[i][1]-h/3, str(int(angle*180./np.pi))+","+str(int(w))+","+str(int(h)), size=9)
+      plt.scatter(cntOrg[i][0],cntOrg[i][1],c='red')
+      #plt.scatter(cntOrg[i][0]-w/2,cntOrg[i][1]-h/2,c='blue')
+      #plt.scatter(cntOrg[i][0]+w/2,cntOrg[i][1]+h/2,c='blue')
 
   plt.show()
+  """
