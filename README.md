@@ -1,5 +1,6 @@
 # object detection for retail
 object detection model for retail products
+project cr
 
 ## object detection model
 we use centernet( [paper](https://arxiv.org/pdf/1904.08189.pdf)  ) for detecting objects
@@ -8,6 +9,10 @@ we use centernet( [paper](https://arxiv.org/pdf/1904.08189.pdf)  ) for detecting
 > train : train.py
 * input  : images (512x384)
 * output : heatmap, regression offsets, sizes, theta
+
+why theta?
++ get more accurate RoI(region of interest)
++ which leads to get more robust feature (improve performance of recognition)
 
 ![test](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/test.png?raw=true)
 
