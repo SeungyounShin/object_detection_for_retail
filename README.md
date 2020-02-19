@@ -12,5 +12,6 @@ we use centernet( [paper](https://arxiv.org/pdf/1904.08189.pdf)  ) for detecting
 ![test](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/test.png?raw=true)
 
 ## recognition model
+further development will be tested with vargfacenet( [paper](https://arxiv.org/abs/1910.04985) )
 
 ## face analysis
