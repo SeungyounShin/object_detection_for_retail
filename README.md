@@ -7,3 +7,7 @@ we use centernet( [paper](https://arxiv.org/pdf/1904.08189.pdf)  ) for detecting
 * output : heatmap, regression offsets, sizes, theta
 
 ![test](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/test.png?raw=true)
+
+## recognition model
+
+## face analysis
