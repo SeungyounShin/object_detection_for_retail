@@ -14,6 +14,7 @@ why theta?
 + get more accurate RoI(region of interest)
 + which leads to get more robust feature (improve performance of recognition)
 
+A detection result with rotated bounding box
 ![test](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/test.png?raw=true)
 
 ## recognition model
