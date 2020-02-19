@@ -15,3 +15,7 @@ we use centernet( [paper](https://arxiv.org/pdf/1904.08189.pdf)  ) for detecting
 further development will be tested with vargfacenet( [paper](https://arxiv.org/abs/1910.04985) )
 
 ## face analysis
+we use azure cognitive service to detect 
++ faces in images
++ face age, gender
++ identification
