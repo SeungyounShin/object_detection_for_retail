@@ -24,7 +24,8 @@ A detection result with rotated bounding box
 :question: discussion
 1. 8 stacked horuglass will improve detection result
 2. centernet with corner esitmation will improve detection result dramatically
-    1.  fit
+    1. A rotated bounding box almost covers corners of the object, corner pooling will be unnecessary.
+    2. Getting corner pixel from guassian heatmap to determine pair of corners, preprocessing of matching technique will be needed.
 
 ## recognition model
 > ./recognition
@@ -47,7 +48,7 @@ we use azure cognitive service to detect
 + face age, gender
 + identification
 
-## our whole solution walkthrough
+## A walkthrough of our solution
 _
 
 ## dependency
