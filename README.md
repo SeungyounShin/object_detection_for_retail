@@ -24,7 +24,7 @@ A detection result with rotated bounding box
 :question: discussion
 1. 8 stacked horuglass will improve detection result
 2. centernet with corner esitmation will improve detection result dramatically
-  1. 
+    1.  fit
 
 ## recognition model
 > ./recognition
