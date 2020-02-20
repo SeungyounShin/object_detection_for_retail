@@ -23,7 +23,7 @@ A detection result with rotated bounding box
 further development will be tested with vargfacenet( [paper](https://arxiv.org/abs/1910.04985) )
 currently we use pretrained-efficientent
 
-our approach
+**our approach**
 1. we get patches from inference model(object detection model) output
 2. padding the images for purpose of handdling dimension error and accurate result
 ![patches](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/patches.png?raw=true)
