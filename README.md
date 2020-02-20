@@ -13,6 +13,7 @@ we use centernet( [paper](https://arxiv.org/pdf/1904.08189.pdf)  ) for detecting
 why theta?
 + get more accurate RoI(region of interest)
 + which leads to get more robust feature (improve performance of recognition)
++ For these reasons, rbox gives kind of alignment effect
 
 A detection result with rotated bounding box
 ![test](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/test.png?raw=true)
