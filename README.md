@@ -18,6 +18,7 @@ A detection result with rotated bounding box
 ![test](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/test.png?raw=true)
 
 ## recognition model
+> ./recognition
 further development will be tested with vargfacenet( [paper](https://arxiv.org/abs/1910.04985) )
 currently we use pretrained-resnet
 
