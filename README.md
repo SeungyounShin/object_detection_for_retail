@@ -19,6 +19,7 @@ A detection result with rotated bounding box
 
 ## recognition model
 further development will be tested with vargfacenet( [paper](https://arxiv.org/abs/1910.04985) )
+currently we use pretrained-resnet
 
 ## face analysis
 we use azure cognitive service to detect 
