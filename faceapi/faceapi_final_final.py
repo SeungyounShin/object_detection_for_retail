@@ -30,7 +30,7 @@ ENDPOINT = os.environ['FACE_ENDPOINT'
 # Create an authenticated FaceClient.
 face_client = FaceClient(ENDPOINT, CognitiveServicesCredentials(KEY))
 
-# Set the subscription_key from your Face service in Azure.
+# write your subscription_key from your Face service in Azure at 'YOUR SUBSCRIPTION_KEY'
 subscription_key = 'YOUR SUBSCRIPTION_KEY'
 assert subscription_key
 
