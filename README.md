@@ -1,6 +1,5 @@
 # object detection for retail
-object detection model for retail products
-project cr
+autonomous solution for unmanned shops 
 
 ## object detection model
 we use centernet( [paper](https://arxiv.org/pdf/1904.08189.pdf)  ) for detecting objects
