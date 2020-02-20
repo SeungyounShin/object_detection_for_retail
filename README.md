@@ -49,6 +49,9 @@ we use azure cognitive service to detect
 + identification
 
 ## A walkthrough of our solution
+**experimental environment**
+_
+**real-world solution**
 _
 
 ## dependency
