@@ -25,3 +25,7 @@ we use azure cognitive service to detect
 + faces in images
 + face age, gender
 + identification
+
+## dependency
+pytorch 1.1.0
+numpy 1.18.1
