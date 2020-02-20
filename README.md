@@ -27,6 +27,5 @@ we use azure cognitive service to detect
 + identification
 
 ## dependency
-pytorch 1.1.0
-
-numpy 1.18.1
++ pytorch 1.1.0
++ numpy 1.18.1
