@@ -21,7 +21,9 @@ A detection result with rotated bounding box
 > ./recognition
 
 further development will be tested with vargfacenet( [paper](https://arxiv.org/abs/1910.04985) )
-currently we use pretrained-resnet
+currently we use pretrained-efficientent
+
+![patches](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/patches.png?raw=true)
 
 ## face analysis
 we use azure cognitive service to detect 
