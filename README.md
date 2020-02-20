@@ -21,6 +21,10 @@ why theta?
 A detection result with rotated bounding box
 ![test](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/test.png?raw=true)
 
+:question: discussion
+
+
+
 ## recognition model
 > ./recognition
 
