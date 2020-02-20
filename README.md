@@ -1,5 +1,5 @@
 # object detection for retail
-autonomous solution for unmanned shops 
+an autonomous solution for unmanned shops based on computer vision
 
 ## object detection model
 we use centernet( [paper](https://arxiv.org/pdf/1904.08189.pdf)  ) for detecting objects
