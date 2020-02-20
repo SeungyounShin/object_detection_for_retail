@@ -22,8 +22,9 @@ A detection result with rotated bounding box
 ![test](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/test.png?raw=true)
 
 :question: discussion
-
-
+1. 8 stacked horuglass will improve detection result
+2. centernet with corner esitmation will improve detection result dramatically
+  1. 
 
 ## recognition model
 > ./recognition
@@ -45,6 +46,9 @@ we use azure cognitive service to detect
 + faces in images
 + face age, gender
 + identification
+
+## our whole solution walkthrough
+_
 
 ## dependency
 + pytorch 1.1.0
