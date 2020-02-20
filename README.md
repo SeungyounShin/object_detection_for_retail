@@ -50,9 +50,13 @@ we use azure cognitive service to detect
 
 ## A walkthrough of our solution
 **experimental environment**
+
 _
+
 **real-world solution**
+
 _
+
 
 ## dependency
 + pytorch 1.1.0
