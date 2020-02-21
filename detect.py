@@ -15,8 +15,8 @@ from utils.patch import patchmaker
 from utils.post_process import ctdet_decode, _nms, _topk
 
 from recognition.model import databaseMat
+from recognition.recog import img2vec
 from nets.hourglass import get_hourglass
-from efficientnet_pytorch import EfficientNet
 
 import torch.nn as nn
 import torch
@@ -35,7 +35,7 @@ model = model.eval()
 #load recognition model
 mat = databaseMat()
 ids, embedding = mat.getMat()
-img2vec = EfficientNet.from_pretrained('efficientnet-b0')
+img2vec = img2vec()
 cossim = cos = nn.CosineSimilarity()
 
 train_img_dir = os.listdir("./data/retail/images")
@@ -113,9 +113,10 @@ end = time.time()
 items = list()
 for k,p in enumerate(minipatch):
     sh = p.shape
-    p = torch.tensor(p.transpose(2,0,1).reshape(1,3,sh[0],sh[1])).float()
-    embedp = img2vec.extract_features(p).view(1,-1)
-    simmat = cossim(embedding,embedp).detach()
+    p = torch.tensor(p.reshape(1,sh[0],sh[1],3)).float()
+    embedp = img2vec.get(p.numpy()).reshape(1,-1)
+
+    simmat = cossim(torch.tensor(embedding),torch.tensor(embedp)).detach()
     productInd = int(simmat.argmax())
     items.append(ids[productInd])
     plt.text(patch_start_coords[k][0], patch_start_coords[k][1],
