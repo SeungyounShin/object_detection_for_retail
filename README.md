@@ -54,9 +54,8 @@ we use azure cognitive service to detect
 ![final_results](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/final_result.png?raw=true)
 
 
-**experimental environment**
-
-_
+**Kiosk UI**
+![final_results](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/UI_test.png?raw=true)
 
 **real-world solution**
 
