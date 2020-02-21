@@ -57,9 +57,11 @@ we use azure cognitive service to detect
 **Kiosk UI**
 ![final_results](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/UI_test.png?raw=true)
 
-**real-world solution**
+**prototype solution architecture**
+![full_arch](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/fullsystem.png?raw=true)
 
-_
+**real-world solution**
+we have to build hardware system to fully operate the system.
 
 
 ## dependency
