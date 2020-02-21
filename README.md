@@ -49,6 +49,11 @@ we use azure cognitive service to detect
 + identification
 
 ## A walkthrough of our solution
+
+**detection with recognition**
+![final_results](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/final_result.png?raw=true)
+
+
 **experimental environment**
 
 _
