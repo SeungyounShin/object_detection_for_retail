@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>mainUI</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}?version=3.2">
+  </head>
+  <div id="items_images">
+     <img src= {{ img_path }} >
+  </div>
+  <div id="items_list">
+    물품리스트
+    <table>
+
+    </table>
+    <div id="items_sum">
+      합계 ::
+    </div>
+  </div>
+  <form method="POST" action="/calculate">
+     <input readonly type="text" name="img_path" value={{ img_path }}>
+     <br>
+     <button type="submit">계산하기</button>
+  </form>
+</html>
