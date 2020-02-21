@@ -59,7 +59,9 @@ we use azure cognitive service to detect
 
 
 **prototype solution architecture**
+
 ![full_arch](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/fullsystem.png?raw=true)
+
 process description
 _update__soon_
 
