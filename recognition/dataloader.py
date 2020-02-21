@@ -135,20 +135,22 @@ class Retail(data.Dataset):
     return self.num_samples
 
 
-
 if __name__ == '__main__':
   import pickle
   import sys,random
   import matplotlib
   import matplotlib.pyplot as plt
-  from skimage.transform import resize
   import matplotlib.patches as patches
   # insert at 1, 0 is the script path (or '' in REPL)
   sys.path.insert(1, '/Users/seungyoun/Desktop/machine_learning/pytorch_simple_CenterNet_45-master')
   from utils.image import get_border, get_affine_transform, affine_transform, color_aug
   from utils.image import draw_umich_gaussian, gaussian_radius
+  from utils.patch import patchmaker
+  import scipy.misc
+
 
   dataset = Retail('/Users/seungyoun/Desktop/machine_learning/pytorch_simple_CenterNet_45-master/data/', 'train')
+  dataset_make_path = "./train"
 
   """
   train_loader = torch.utils.data.DataLoader(dataset, batch_size=2,
@@ -159,62 +161,33 @@ if __name__ == '__main__':
       print(b)
   """
 
-  plt.figure(figsize=(6,6))
-  ws, hs = list(),list()
-  for i in range(len(dataset)):
-      batch = dataset[i]
-      w_h_ = batch['w_h_']
-      objNum = sum(batch['ind_masks'])
-      for n in range(objNum):
-          ws.append(w_h_[n][0]*512)
-          hs.append(w_h_[n][1]*384)
-  plt.scatter(ws,hs, s=1)
-  print(len(ws),len(hs))
-  plt.show()
-
-  """
-  fig = plt.figure(figsize=(12, 6))
 
   select = random.randint(1,150)
-  batch = dataset[select]
+  lendata = len(dataset)
+  for index in range(lendata):
+      batch = dataset[index]
 
-  img   = torch.tensor(batch['image'])
-  img = img.permute(1,2,0).numpy()
-  plt.imshow(img)
+      img   = torch.tensor(batch['image'])
+      img = img.permute(1,2,0).numpy()
 
-  hmap  = batch['hmap']
-  hmap = hmap.transpose(1,2,0).squeeze()
-  hmap = resize(hmap, (96*4, 128*4))
+      inds = batch['inds']
+      w_h_ = batch['w_h_']
+      regs = batch['regs']
+      theta= batch['theta']
+      ind_masks = batch['ind_masks']
+      cntOrg = batch['center']*4.
+      objs = sum(ind_masks)
+      cntOrg = np.array([cntOrg[i] for i in range(objs)])
 
-  plt.imshow(hmap, alpha = 0.5)
+      minipatch = list()
+      for i in range(objs):
+          angle = theta[i]
+          w = w_h_[i][0]*512.
+          h = w_h_[i][1]*384.
 
-  inds = batch['inds']
-  w_h_ = batch['w_h_']
-  regs = batch['regs']
-  theta= batch['theta']
-  ind_masks = batch['ind_masks']
-  cntOrg = batch['center']*4.
-  objs = sum(ind_masks)
-  cntOrg = np.array([cntOrg[i] for i in range(objs)])
+          obj_patch = patchmaker(img,h,w,cntOrg[i][0],cntOrg[i][1],angle)
+          minipatch.append(obj_patch)
 
-  for i in range(objs):
-      angle = theta[i]
-      print("="*30)
-      print("angle : ",angle*180./np.pi)
-      w = w_h_[i][0]*512.
-      h = w_h_[i][1]*384.
-      print(cntOrg[i],w,h)
-
-      rect = patches.Rectangle((cntOrg[i][0]-w/2,cntOrg[i][1]-h/2),w,h,linewidth=1,edgecolor='r',facecolor='none')
-      rectRot = patches.Rectangle((cntOrg[i][0]-w/2,cntOrg[i][1]-h/2),w,h,linewidth=1,edgecolor='b',facecolor='none')
-     # plt.gca().add_patch(rect)
-      t = matplotlib.transforms.Affine2D().rotate_around(float(cntOrg[i][0]), float(cntOrg[i][1]), float(angle))
-      rectRot.set_transform(t + plt.gca().transData)
-      plt.gca().add_patch(rectRot)
-      plt.text(cntOrg[i][0]-w/3, cntOrg[i][1]-h/3, str(int(angle*180./np.pi))+","+str(int(w))+","+str(int(h)), size=9)
-      plt.scatter(cntOrg[i][0],cntOrg[i][1],c='red')
-      #plt.scatter(cntOrg[i][0]-w/2,cntOrg[i][1]-h/2,c='blue')
-      #plt.scatter(cntOrg[i][0]+w/2,cntOrg[i][1]+h/2,c='blue')
-
-  plt.show()
-  """
+      #make dataset for recognition
+      for k,p in enumerate(minipatch):
+          scipy.misc.imsave(dataset_make_path+"/"+str(index)+"_"+str(k)+".jpg", p)

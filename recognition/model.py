@@ -3,10 +3,11 @@ import torch,os,math
 import cv2
 import numpy as np
 from PIL import Image
+from recognition.recog import img2vec
 
 class feature_extract():
     def __init__(self):
-        self.model = EfficientNet.from_pretrained('efficientnet-b7')
+        self.model = img2vec()
 
 
 class databaseMat():
@@ -14,7 +15,7 @@ class databaseMat():
         self.root = "./data/products"
         self.images_paths = os.listdir(self.root)
         self.ids = [i.split(".")[0] for i in self.images_paths]
-        self.model = EfficientNet.from_pretrained('efficientnet-b0')
+        self.model = img2vec()
         self.frame_size = 152
     def getMat(self):
         embedding = list()
@@ -28,10 +29,10 @@ class databaseMat():
             frame[self.frame_size//2-math.ceil(roishape[0]/2.):self.frame_size//2+math.floor(roishape[0]/2.),
                   self.frame_size//2-math.ceil(roishape[1]/2.):self.frame_size//2+math.floor(roishape[1]/2.),:] = img
             frame /= 255.
-            frame = torch.tensor(frame.transpose(2,0,1).reshape(1,3,self.frame_size,self.frame_size)).float()
-            vec = self.model.extract_features(frame).view(-1)
+            frame = torch.tensor(frame.reshape(1,self.frame_size,self.frame_size,3)).float()
+            vec = self.model.get(frame.numpy()).reshape(-1)
             embedding.append(vec)
-        embedding = torch.stack(tuple([embedding[i] for i in range(len(embedding))]))
+        embedding = np.stack([embedding[i] for i in range(len(embedding))])
         return self.ids, embedding
 
 if __name__ == "__main__":

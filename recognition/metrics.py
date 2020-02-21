@@ -43,7 +43,6 @@ class ArcFace(Layer):
         # feature re-scale
         logits *= self.s
         out = tf.nn.softmax(logits)
-        print("out!!!!!")
         return out
 
     def compute_output_shape(self, input_shape):
