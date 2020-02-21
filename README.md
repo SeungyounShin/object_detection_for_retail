@@ -58,12 +58,12 @@ we use azure cognitive service to detect
 ![final_results](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/UI_test.png?raw=true)
 
 
-**prototype solution architecture**
+**Prototype solution architecture**
 
 ![full_arch](https://github.com/SeungyounShin/object_detection_for_retail/blob/master/resource/fullsystem.png?raw=true)
 
-process description
-_update__soon_
+A description of each step is above.
+
 
 **real-world solution**
 we have to build hardware system to fully operate the system.
